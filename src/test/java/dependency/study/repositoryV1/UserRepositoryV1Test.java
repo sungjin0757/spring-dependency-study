@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SpringBootTest
-public class UserRepositoryTest {
+public class UserRepositoryV1Test {
 
-    @Autowired private UserRepository userRepository;
+    @Autowired private UserRepositoryV1 userRepository;
 
     @Test
     @DisplayName("데이터 저장 테스트")

@@ -8,7 +8,7 @@ import javax.persistence.EntityManager;
 
 @RequiredArgsConstructor
 @Repository
-public class UserRepository {
+public class UserRepositoryV1 {
 
     private final EntityManager em;
 
@@ -25,4 +25,5 @@ public class UserRepository {
         User user=findOne(id);
         em.remove(user);
     }
+
 }
