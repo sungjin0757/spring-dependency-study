@@ -18,12 +18,14 @@ import javax.persistence.PersistenceContext;
 @Transactional
 public class UserRepositoryV3Test {
 
-    @Autowired UserRepositoryV3 userRepository;
+    @Autowired EntityManager em;
 
     @Test
     @DisplayName("repositoryV3 테스트")
     void v3_테스트(){
         User user1=createUser("hong","1234");
+
+        UserRepositoryV3 userRepository=new UserRepositoryV3(em);
 
         Long saveId = userRepository.save(user1);
 

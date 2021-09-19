@@ -1,6 +1,7 @@
 package dependency.study.repository.repositoryV3;
 
 import dependency.study.domain.User;
+import dependency.study.repository.repositoryV4.UserRepositoryV4;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,12 +15,16 @@ import javax.persistence.EntityManager;
 @Transactional
 public class UserServiceV3Test {
 
-    @Autowired UserServiceV3 userServiceV3;
+    @Autowired EntityManager em;
 
     @Test
     @DisplayName("v3 service test")
     void service_v3_테스트(){
         User user=createUser("hong","123");
+
+        UserRepositoryV3 userRepository=new UserRepositoryV3(em);
+
+        UserServiceV3 userServiceV3=new UserServiceV3(userRepository);
 
         Long joinId = userServiceV3.join(user);
 

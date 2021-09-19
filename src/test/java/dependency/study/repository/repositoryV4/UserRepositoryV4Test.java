@@ -8,16 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+
 @SpringBootTest
 @Transactional
 public class UserRepositoryV4Test {
 
-    @Autowired private UserRepositoryV4 userRepositoryV4;
+    @Autowired
+    EntityManager em;
 
     @Test
     @DisplayName("V4 테스트")
     void V4_테스트(){
         User user=createUser("hong","123");
+
+        UserRepositoryV4 userRepositoryV4=new UserRepositoryV4Impl(em);
 
         Long saveId = userRepositoryV4.save(user);
 

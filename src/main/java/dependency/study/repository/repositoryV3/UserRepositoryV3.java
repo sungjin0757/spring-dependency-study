@@ -8,7 +8,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Optional;
 
-@Repository
 @RequiredArgsConstructor
 public class UserRepositoryV3 {
 

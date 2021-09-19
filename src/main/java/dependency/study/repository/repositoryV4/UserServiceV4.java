@@ -9,12 +9,10 @@ import javax.persistence.EntityManager;
 import java.util.Optional;
 
 @Transactional
-@Service
 public class UserServiceV4 {
 
     private final UserRepositoryV4 userRepositoryV4;
 
-    @Autowired
     public UserServiceV4(EntityManager em) {
         this.userRepositoryV4 = new UserRepositoryV4Impl(em);
     }

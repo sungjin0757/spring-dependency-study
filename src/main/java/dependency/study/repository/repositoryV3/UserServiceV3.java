@@ -11,11 +11,9 @@ import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor
-@Service
 public class UserServiceV3 {
 
     private final UserRepositoryV3 userRepositoryV3;
-
 
     public Long join(User user){
         return userRepositoryV3.save(user);
