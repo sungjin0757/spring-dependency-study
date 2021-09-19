@@ -1,4 +1,4 @@
-package dependency.study.repositoryV3;
+package dependency.study.repository.repositoryV3;
 
 
 import dependency.study.domain.User;
@@ -9,13 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
 
 @SpringBootTest
 @Transactional
 public class UserRepositoryV3Test {
 
-    @Autowired private UserRepositoryV3 userRepository;
+    @Autowired UserRepositoryV3 userRepository;
 
     @Test
     @DisplayName("repositoryV3 테스트")

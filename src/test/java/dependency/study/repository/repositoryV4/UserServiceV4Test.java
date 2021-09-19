@@ -1,4 +1,4 @@
-package dependency.study.repositoryV4;
+package dependency.study.repository.repositoryV4;
 
 import dependency.study.domain.User;
 import org.assertj.core.api.Assertions;
@@ -8,22 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @SpringBootTest
 @Transactional
-public class UserRepositoryV4Test {
+public class UserServiceV4Test {
 
-    @Autowired private UserRepositoryV4 userRepositoryV4;
+    @Autowired UserServiceV4 userServiceV4;
 
     @Test
-    @DisplayName("V4 테스트")
-    void V4_테스트(){
+    @DisplayName("V4 service test")
+    void v4_서비스_테스트(){
         User user=createUser("hong","123");
 
-        Long saveId = userRepositoryV4.save(user);
+        Long saveId = userServiceV4.join(user);
 
-        User findUser = userRepositoryV4.findById(saveId).get();
+        User findUser = userServiceV4.findOne(saveId);
 
         Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
         Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());

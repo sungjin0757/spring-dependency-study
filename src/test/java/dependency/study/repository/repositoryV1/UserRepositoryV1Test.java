@@ -1,4 +1,4 @@
-package dependency.study.repositoryV1;
+package dependency.study.repository.repositoryV1;
 
 import dependency.study.domain.User;
 import org.assertj.core.api.Assertions;
