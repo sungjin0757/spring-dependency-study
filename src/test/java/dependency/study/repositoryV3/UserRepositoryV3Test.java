@@ -18,7 +18,7 @@ public class UserRepositoryV3Test {
     @Autowired private UserRepositoryV3 userRepository;
 
     @Test
-    @DisplayName("repositoryV2 테스트")
+    @DisplayName("repositoryV3 테스트")
     void v3_테스트(){
         User user1=createUser("hong","1234");
 
