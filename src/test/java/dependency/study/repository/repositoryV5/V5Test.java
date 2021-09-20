@@ -23,6 +23,22 @@ public class V5Test {
     @Autowired EntityManager em;
 
     @Test
+    @DisplayName("v5 repositoryTest")
+    void v5_repository_테스트(){
+        User user=createUser("hong","1234");
+
+        UserRepositoryV5 userRepository=new UserRepositoryV5Impl(em);
+
+        Long saveId= userRepository.save(user);
+
+        User findUser=userRepository.findById(saveId).get();
+
+        Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
+        Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());
+
+    }
+
+    @Test
     @DisplayName("v5 total test")
     void v5_통합_테스트(){
         User user=createUser("hong","123");
