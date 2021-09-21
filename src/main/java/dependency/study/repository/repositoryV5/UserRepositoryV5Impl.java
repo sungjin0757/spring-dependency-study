@@ -28,6 +28,8 @@ public class UserRepositoryV5Impl implements UserRepositoryV5 {
     @Override
     public void remove(Long userId) {
         User findUser = findById(userId).orElse(null);
+        if(findUser==null)
+            throw  new IllegalArgumentException();
         em.remove(findUser);
     }
 }

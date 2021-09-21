@@ -1,15 +1,13 @@
-package dependency.study.repository.repositoryV4;
+package dependency.study.repository.repositoryV2;
 
 import dependency.study.domain.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class UserRepositoryV4Impl implements UserRepositoryV4{
+public class UserRepositoryV2Extends extends UserRepositoryV2{
 
     private final EntityManager em;
 
@@ -27,8 +25,10 @@ public class UserRepositoryV4Impl implements UserRepositoryV4{
     @Override
     public void remove(Long userId) {
         User findUser = findById(userId).orElse(null);
+
         if(findUser==null)
             throw  new IllegalArgumentException();
+
         em.remove(findUser);
     }
 }

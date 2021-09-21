@@ -20,6 +20,8 @@ public class UserRepositoryV3 {
 
     public void remove(Long id){
         User findUser = findById(id).orElse(null);
+        if(findUser==null)
+            throw  new IllegalArgumentException();
         em.remove(findUser);
     }
     public Optional<User> findById(Long id){
