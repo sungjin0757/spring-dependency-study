@@ -8,9 +8,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Optional;
 
+
 @RequiredArgsConstructor
 public class UserRepositoryV5Impl implements UserRepositoryV5 {
-
 
     private final EntityManager em;
 

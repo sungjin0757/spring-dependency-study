@@ -20,7 +20,7 @@ import javax.persistence.PersistenceContext;
 @Transactional
 public class V5Test {
 
-    @Autowired EntityManager em;
+    @PersistenceContext EntityManager em;
 
     @Test
     @DisplayName("v5 repositoryTest")
@@ -53,6 +53,8 @@ public class V5Test {
         Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
         Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());
     }
+
+
 
     private User createUser(String name, String password){
         return User.createUser()
