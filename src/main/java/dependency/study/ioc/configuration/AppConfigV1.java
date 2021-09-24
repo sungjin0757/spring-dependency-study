@@ -17,6 +17,7 @@ import java.beans.JavaBean;
 public class AppConfigV1 {
 
     @Bean
+    @Primary
     public LocalEntityManagerFactoryBean getEmf(){
         LocalEntityManagerFactoryBean emf=new LocalEntityManagerFactoryBean();
         emf.setPersistenceUnitName("hello");
@@ -24,6 +25,7 @@ public class AppConfigV1 {
     }
 
     @Bean
+    @Primary
     public EntityManager getEm(){
         return getEmf().getObject().createEntityManager();
     }

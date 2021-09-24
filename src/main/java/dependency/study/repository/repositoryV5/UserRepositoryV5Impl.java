@@ -32,4 +32,5 @@ public class UserRepositoryV5Impl implements UserRepositoryV5 {
             throw  new IllegalArgumentException();
         em.remove(findUser);
     }
+
 }
