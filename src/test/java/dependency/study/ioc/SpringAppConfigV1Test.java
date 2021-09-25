@@ -1,27 +1,26 @@
 package dependency.study.ioc;
 
 import dependency.study.domain.User;
-import dependency.study.ioc.configuration.AppConfigV1;
+import dependency.study.ioc.configuration.SpringAppConfig;
 
 import dependency.study.repository.repositoryV5.UserServiceV5;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-public class AppConfigV1Test {
+public class SpringAppConfigTest {
 
     @Test
     @DisplayName("Bean Test")
     void 빈_테스트(){
         User user=createUser("hong","123");
 
-        AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(AppConfigV1.class);
+        AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(SpringAppConfig.class);
 
         UserServiceV5 userService= ac.getBean("userService",UserServiceV5.class);
 

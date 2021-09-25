@@ -14,7 +14,7 @@ import javax.persistence.PersistenceContext;
 import java.beans.JavaBean;
 
 @Configuration
-public class AppConfigV1 {
+public class SpringAppConfig {
 
     @Bean
     @Primary
