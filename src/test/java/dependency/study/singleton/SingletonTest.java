@@ -1,13 +1,12 @@
 package dependency.study.singleton;
 
-import dependency.study.ioc.configuration.AppConfigV1;
+import dependency.study.ioc.configuration.SpringAppConfigV1;
 import dependency.study.repository.repositoryV5.AppConfig;
 import dependency.study.repository.repositoryV5.UserServiceV5;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,7 @@ public class SingletonTest {
     @Test
     @DisplayName("스프링 빈 애플리케이션 컨텍스트 테스트")
     void 스프링_빈_테스트(){
-        AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(AppConfigV1.class);
+        AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(SpringAppConfigV1.class);
 
         UserServiceV5 userService1=ac.getBean("userService",UserServiceV5.class);
         UserServiceV5 userService2=ac.getBean("userService",UserServiceV5.class);

@@ -1,7 +1,7 @@
 package dependency.study.ioc;
 
 import dependency.study.domain.User;
-import dependency.study.ioc.configuration.SpringAppConfig;
+import dependency.study.ioc.configuration.SpringAppConfigV1;
 
 import dependency.study.repository.repositoryV5.UserServiceV5;
 import org.assertj.core.api.Assertions;
@@ -13,14 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-public class SpringAppConfigTest {
+public class SpringAppConfigV1Test {
 
     @Test
     @DisplayName("Bean Test")
     void 빈_테스트(){
         User user=createUser("hong","123");
 
-        AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(SpringAppConfig.class);
+        AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(SpringAppConfigV1.class);
 
         UserServiceV5 userService= ac.getBean("userService",UserServiceV5.class);
 
