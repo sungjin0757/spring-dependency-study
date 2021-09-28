@@ -10,10 +10,15 @@ import javax.persistence.EntityManager;
 import java.util.Optional;
 
 @Transactional
-@RequiredArgsConstructor
 public class UserServiceV3 {
 
+    private final EntityManager em;
     private final UserRepositoryV3 userRepositoryV3;
+
+    public UserServiceV3(EntityManager em) {
+        this.em = em;
+        this.userRepositoryV3 = new UserRepositoryV3(em);
+    }
 
     public Long join(User user){
         return userRepositoryV3.save(user);

@@ -8,11 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Transactional
 @SpringBootTest
 public class UserRepositoryV1Test {
 
-    @Autowired private UserRepositoryV1 userRepository;
+    @Autowired
+    EntityManager em;
 
     @Test
     @DisplayName("데이터 저장 테스트")
@@ -22,11 +28,14 @@ public class UserRepositoryV1Test {
                         .password("1234")
                         .build();
 
+        UserRepositoryV1 userRepository=new UserRepositoryV1(em);
         Long saveId = userRepository.save(user);
 
         User findUser = userRepository.findOne(saveId);
 
         Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
         Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());
+
     }
+
 }

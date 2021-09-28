@@ -7,7 +7,7 @@ import javax.persistence.EntityManager;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class UserRepositoryV2Extends extends UserRepositoryV2{
+public class UserRepositoryV2Extends extends UserServiceV2 {
 
     private final EntityManager em;
 

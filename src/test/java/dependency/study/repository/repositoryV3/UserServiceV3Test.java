@@ -22,9 +22,7 @@ public class UserServiceV3Test {
     void service_v3_테스트(){
         User user=createUser("hong","123");
 
-        UserRepositoryV3 userRepository=new UserRepositoryV3(em);
-
-        UserServiceV3 userServiceV3=new UserServiceV3(userRepository);
+        UserServiceV3 userServiceV3=new UserServiceV3(em);
 
         Long joinId = userServiceV3.join(user);
 

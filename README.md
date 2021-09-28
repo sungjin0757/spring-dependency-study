@@ -65,27 +65,43 @@ public class User {
 **UserRepositoryV1.java**
 
 ```java
+import org.springframework.transaction.annotation.Transactional;
+
 @RequiredArgsConstructor
-@Repository
+@Transactional
 public class UserRepositoryV1 {
 
-    private final EntityManager em;
+  private final EntityManager em;
 
-    public Long save(User user){
-        em.persist(user);
-        return user.getId();
-    }
+  public Long join(User user) {
+    return save(user);
+  }
 
-    public User findOne(Long id){
-        return em.find(User.class,id);
-    }
+  public User findOne(Long userId) {
+    Optional<User> findUser = findById(userId);
 
-    public void remove(Long id){
-        User user=findOne(id);
-        em.remove(user);
-    }
+    return findUser.orElseThrow(() -> {
+              throw new RuntimeException();
+            }
+    );
+  }
+
+  public Long save(User user) {
+    em.persist(user);
+    return user.getId();
+  }
+
+  public Optional<User> findById(Long id) {
+    return Optional.ofNullable(em.find(User.class, id));
+  }
+
+  public void remove(Long id) {
+    User user = findOne(id);
+    em.remove(user);
+  }
 
 }
+
 
 ```
 
@@ -95,23 +111,25 @@ public class UserRepositoryV1 {
 @SpringBootTest
 public class UserRepositoryV1Test {
 
-    @Autowired private UserRepositoryV1 userRepository;
+  @Autowired
+  EntityManager em;
 
-    @Test
-    @DisplayName("데이터 저장 테스트")
-    void 회원저장_Test(){
-        User user=User.createUser()
-                        .name("홍성진")
-                        .password("1234")
-                        .build();
+  @Test
+  @DisplayName("데이터 저장 테스트")
+  void 회원저장_Test(){
+    User user=User.createUser()
+            .name("홍성진")
+            .password("1234")
+            .build();
 
-        Long saveId = userRepository.save(user);
+    UserRepositoryV1 userRepository=new UserRepositoryV1(em);
+    Long saveId = userRepository.save(user);
 
-        User findUser = userRepository.findOne(saveId);
+    User findUser = userRepository.findOne(saveId);
 
-        Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
-        Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());
-    }
+    Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
+    Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());
+  }
 }
 ```
 
@@ -155,10 +173,232 @@ public class UserRepositoryV1Test {
 
 하지만, 현재, Ver 1. 에서는 `repository`클래스 하나로만 구성되어 있습니다. 즉, 사용 시점마다 원하는 로직에 대한 코드로의 번거로운 수정이
 필요하게 됩니다. 또한, 이 클래스를 개발한 개발자가 그만두고 다른 개발자가 이어서 작업을 한다고 생각한다면, 어느 부분을 수정해야 할 지도
-모를 수 있다는 상황이 발생할 수 있습니다.
+모를 수 있으며 관심사가 다른 메소드들이 한 클래스내에 다 존재하고 있습니다.
 
 **이러한 문제를 해결을 하기 위해서 기존 코드를 분리할 시점에 도달했습니다.**
 
 ### 🔧 Version 2.
+Version 1. 에서의 코드를 보시면 한 가지 클래스내에 데이터베이스에 접근하는 메소드와 데이터베이스를 이용하여 비즈니스 로직을 담당하고 있는 메소드가 있습니다.
+이 둘의 관심사를 `repository` 와 `service`로 분리시켜 봅시다.
+어떻게 할까요??!
 - 상속을 통한 확장
  
+**UserRepositoryV2.java**
+
+```java
+public abstract class UserServiceV2 {
+
+  public Long join(User user){
+    return save(user);
+  }
+
+  public User findOne(Long userId){
+    Optional<User> findUser=findById(userId);
+
+    return findUser.orElseThrow(()->{
+              throw new RuntimeException();
+            }
+    );
+  }
+  public abstract Long save(User user);
+  public abstract Optional<User> findById(Long userId);
+  public abstract void remove(Long userId);
+}
+
+```
+
+**UserRepositoryV2Extends.java**
+
+```java
+@RequiredArgsConstructor
+public class UserRepositoryV2Extends extends UserServiceV2{
+
+    private final EntityManager em;
+
+    @Override
+    public Long save(User user) {
+        em.persist(user);
+        return user.getId();
+    }
+
+    @Override
+    public Optional<User> findById(Long userId) {
+        return Optional.ofNullable(em.find(User.class,userId));
+    }
+
+    @Override
+    public void remove(Long userId) {
+        User findUser = findById(userId).orElse(null);
+
+        if(findUser==null)
+            throw  new IllegalArgumentException();
+
+        em.remove(findUser);
+    }
+}
+```
+
+**UserServiceV2Test.java**
+
+```java
+@SpringBootTest
+@Transactional
+public class UserServiceV2Test {
+
+  @Autowired
+  EntityManager em;
+
+  @Test
+  @DisplayName("V2 test")
+  void V2_테스트(){
+
+    User user=createUser("hong","1234");
+
+    UserServiceV2 userService=new UserRepositoryV2Extends(em);
+
+    Long saveId = userService.join(user);
+
+    User findUser = userService.findOne(saveId).get();
+
+    Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
+    Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());
+  }
+
+  private User createUser(String name, String password){
+    return User.createUser()
+            .name(name)
+            .password(password)
+            .build();
+  }
+}
+```
+
+**테스트 결과**
+
+<img width="50%" alt="스크린샷 2021-09-28 오후 5 33 37" src="https://user-images.githubusercontent.com/56334761/135062980-7c4e4236-43ad-48e1-8ff4-e6e0d792cba9.png">
+
+**추상 클래스를 활용하여 `repository`의 변경 작업을 한층 더 용이하게 사용할 수 있게 되었습니다.**
+- 단순히 변경 이상으로 손쉽게 확장할 수 도 있게 되었습니다.
+- 이제는 `repository`클래스의 코드를 변경할 필요없이 기능을 새롭게 정의한 클래스를 만들 수 있습니다.
+
+**👍 템플릿 메소드 패턴**
+>기본적인 로직의 흐름을 만들고, 그 기능의 일부를 추상 메소드나 오버라이딩이 가능한 메소드 등으로 만든 뒤
+서브클래스에서 이런 메소드를 필요에 맞게 구현해서 사용하도록 하는 방법을 디자인 패턴에서 템플릿 메소드 패턴이라고 합니다.
+
+**BUT, 변경 및 확장이 용이해졌지만 상속을 활용했다는 단점이 존재**
+- 자바는 다중상속 허용 금지.
+- 서브 클래스가 슈퍼 클래스의 기능을 사용할 수 있음.
+  - 슈퍼 클래스 내부의 변경이 있을 때, 모든 서브클래스의 내용을 수정해야할 수도 있음. 즉, 관심사의 분리가 완벽하지 않다는 뜻.
+
+### 🔧 Version 3.
+- 독립적인 클래스로 분리하여 관심사를 분리
+  - `repository` 관련된 부분을 상속클래스가 아닌 아예 별도의 클래스로 만들어봅시다.
+
+**UserRepositoryV3.java**
+```java
+@RequiredArgsConstructor
+public class UserRepositoryV3 {
+
+    private final EntityManager em;
+
+    public Long save(User user){
+        em.persist(user);
+        return user.getId();
+    }
+
+    public void remove(Long id){
+        User findUser = findById(id).orElse(null);
+        if(findUser==null)
+            throw  new IllegalArgumentException();
+        em.remove(findUser);
+    }
+    public Optional<User> findById(Long id){
+        return Optional.ofNullable(em.find(User.class,id));
+    }
+    public Optional<User> findByName(String name){
+        return Optional.ofNullable(em.createQuery("select u from User u where u.name=:name",User.class)
+                .setParameter("name",name)
+                .getSingleResult());
+    }
+
+}
+```
+
+**UserServiceV3.java**
+```java
+@Transactional
+public class UserServiceV3 {
+
+  private final EntityManager em;
+  private final UserRepositoryV3 userRepositoryV3;
+
+  public UserServiceV3(EntityManager em) {
+    this.em = em;
+    this.userRepositoryV3 = new UserRepositoryV3(em);
+  }
+
+  public Long join(User user){
+    return userRepositoryV3.save(user);
+  }
+
+  public User findOne(Long userId){
+    Optional<User> findUser=userRepositoryV3.findById(userId);
+
+    return findUser.orElseThrow(()->{
+              throw new RuntimeException();
+            }
+    );
+  }
+}
+```
+
+**UserServiceV3Test.java**
+```java
+@SpringBootTest
+@Transactional
+public class UserServiceV3Test {
+
+    @Autowired EntityManager em;
+
+    @Test
+    @DisplayName("v3 service test")
+    void service_v3_테스트(){
+        User user=createUser("hong","123");
+
+        UserServiceV3 userServiceV3=new UserServiceV3(em);
+
+        Long joinId = userServiceV3.join(user);
+
+        User findUser = userServiceV3.findOne(joinId);
+
+        Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
+        Assertions.assertThat(findUser.getId()).isEqualTo(joinId);
+    }
+
+    private User createUser(String name, String password){
+        return User.createUser()
+                .name(name)
+                .password(password)
+                .build();
+    }
+}
+```
+
+**동작 확인**
+
+<img width="50%" alt="스크린샷 2021-09-28 오후 7 10 32" src="https://user-images.githubusercontent.com/56334761/135067909-22b78bb8-3a91-4eec-85b4-ef97401543e6.png">
+
+**동작이 되는 것을 확인하실 수 있습니다.**
+
+하지만, 한 눈에 보더라도 많은 문제가 존재하죠!
+- `repository`의 확장이 다시 불가능해졌습니다.
+  - `service`의 코드가 특정 `repository`에 종속되었기 때문입니다. 
+  - 만일, `repsitory`의 특정 메소드 이름이 바뀌고, 이 메소드를 사용하는 곳이 수 백개 이상이라면 일일히 다 찾아가서 수정하는 작업은 너무 번거롭게 됩니다.
+- `repsotory`가 어떤 클래스인지 `service`에서 구체적으로 알고 있어야 합니다. 즉, 이 또한 클래스의 변경이 일어난다면, 사용하고 있는 클래스에서 일일히 수정을 해야합니다.
+
+**결론적으로, 이런 식으로 설계가 된다면, 어떤 클래스가 쓰일지 어떤 메소드가 쓰일지에 대한 정보를 일일히 다 알고 있어야 합니다.**
+- 따라서 `service`는 구체적인 `repository`클래스에 종속될수 밖에 없습니다.
+
+**상속의 문제를 해결하고자 한 것이 더 많은 문제를 초래하게 되었습니다.**
+
+### 🔧 Version 4.

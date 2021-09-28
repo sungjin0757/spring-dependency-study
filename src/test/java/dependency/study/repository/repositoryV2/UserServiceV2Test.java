@@ -12,7 +12,7 @@ import javax.persistence.EntityManager;
 
 @SpringBootTest
 @Transactional
-public class UserRepositoryV2Test {
+public class UserServiceV2Test {
 
     @Autowired
     EntityManager em;
@@ -23,11 +23,11 @@ public class UserRepositoryV2Test {
 
         User user=createUser("hong","1234");
 
-        UserRepositoryV2 userRepository=new UserRepositoryV2Extends(em);
+        UserServiceV2 userService=new UserRepositoryV2Extends(em);
 
-        Long saveId = userRepository.save(user);
+        Long saveId = userService.join(user);
 
-        User findUser = userRepository.findById(saveId).get();
+        User findUser = userService.findOne(saveId);
 
         Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
         Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());
