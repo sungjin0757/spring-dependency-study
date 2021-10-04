@@ -731,4 +731,305 @@ public class V5Test {
 
 **스프링이란 객체지향적 설계 원칙과 디자인 패턴에 나타난 장점을 자연스럽게 개발자들이 활용할 수 있게 해주는 프레임워크입니다.**
 
-  
+***
+## 🚀 제어의 역전(IOC)
+
+### 🔧 팩토리
+객체의 생성 방법을 결정하고 그렇게 만들어진 오브젝트를 돌려주는 일을 하는 오브젝트를 뜻합니다.
+오브젝트를 생성하는 쪽과 생성된 오브젝트를 사용하는 쪽의 역할과 책임을 깔끔하게 분리하려는 목적으로 사용합니다.
+
+이는, Ver 5. 에서 만들어봤던 `AppConfig` 와 같은 클래스를 뜻합니다.
+
+```java
+@RequiredArgsConstructor
+public class AppConfig {
+
+    private final EntityManager em;
+
+    public UserRepositoryV5 userRepository(){
+        return new UserRepositoryV5Impl(em);
+    }
+
+    public UserServiceV5 userService(){
+        return new UserServiceV5(userRepository());
+    }
+}
+```
+
+`service` -> `repository` 와 같은 의존 관계를 형성하고 있을 때, 새로운 `repository` 구현 클래스로 변경이 필요하면 `AppConfig`클래스만 수정해주면 됩니다.
+
+예를 들자면, `repositoryImplV1` 과 `repositoryImplV2`와 같은 `repository`구현체가 있을 때,
+```java
+@RequiredArgsConstructor
+public class AppConfig {
+
+    private final EntityManager em;
+
+    public UserRepositoryV5 userRepository(){
+       // return new UserRepositoryV5Impl(em);
+      return new UserRepositoryV5ImplV2(em);
+    }
+
+    public UserServiceV5 userService(){
+        return new UserServiceV5(userRepository());
+    }
+}
+```
+이런 식으로만, 바꿔준다면 되는 것을 의미합니다.
+
+### 🔧 제어권의 이전을 통한 제어관계 역전
+
+일반적인 프로그램의 흐름은 main() 메소드와 같은 프로그램이 시작되는 지점에서 사용할 오브젝트, 오브젝트의 메소드 호출 등등 
+모든 종류의 작업을 사용자가 능동적으로, 직접 제어하는 구조입니다.
+
+**제어의 역전이란 이런 일반적인 프로그램의 흐름을 거꾸로 뒤집는 것 입니다.**
+
+제어의 역전에서는 자신이 사용할 오브젝트를 결정하지 않을 뿐더럴 생성조차 하지 않습니다.
+모든 제어 권한을 자신이 아닌 다른 대상에게 위임하는 것을 뜻합니다.
+
+흔히, 스프링과 같은 프레임워크는 제어의 역전 개념이 적용된 대표적인 기술이라고 합니다.
+프레임워크와 라이브러리를 혼동할수도 있는데 둘은 엄연히 차이가 있습니다.
+- 라이브러리
+  - 동작하는 중에 필요한 기능이 있을 때, 능동적으로 라이브러리를 사용. 애플리케이션의 흐름은 직접 제어
+- 프레임워크
+  - 애플리케이션 코드가 프레임워크에 의해 사용.
+  - 프레임워크 위에 개발한 클래스를 등록해두고, 프레임워크가 흐름을 주도하는 중에 개발자가 만든 애플리케이션 코드를 사용하는 방식.
+
+지금, 우리가 만든 `repository` 와 `service` 사이에서도 제어의 역전이 적용 되어 있습니다.
+일반적인 프로그램의 경우, `repository`의 구현 클래스를 결정하고 오브젝트를 만드는 결정권한은 `service`에 있을 것입니다.
+그러나, 지금음 `AppConfig`에 있습니다. `service`는 능동적인 존재가 아닌, 수동적인 존재가 되었다고고 말할 수 있습니다.
+`service`는 자기 자신도 수동적으로 만들어 지며, 사용할 오브젝트 또한 수동적으로 공급 받게 됩니다.
+
+현재 지금 만든 것은 가장 단순한 IOC 프레임워크를 만들었다고 보면 될것이고, 이제 애플리케이션 전반에 걸쳐 사용하기 위해서는 대표적인 IOC 프레임워크인
+**스프링의 도움이 필요하합니다.(컴포넌트의 생성과 관계설정, 사용, 생명주기 관리등을 관장하는 존재)**
+
+***
+
+## 🚀 스프링 IOC
+
+스프링의 핵심을 담당하는 것은 빈 팩토리 또는 애플리케이션 컨텍스트라고 불리는 것입니다. 한번 알아보죠~!
+
+### 🔧 오브젝트 팩토리를 이용한 스프링 IOC
+
+- 스프링 빈
+  - 스프링에서는 스프링이 제어권을 가지고 직접 만들고 관계를 부여하는 오브젝트를 빈이라고 부릅니다. 또한, 스프링 컨테이너가 생성과 관계설정, 사용들을 제어해주는 
+  제어의 역전이 적용된 오브젝트를 가리키는 말입니다.
+
+**애플리케이션 컨텍스트, 빈 팩토리**
+- 빈의 생성과 관계설정 같은 제어를 담당하는 IOC 오브젝트를 빈 팩토리 또는 애플리케이션 컨텍스트라고 부릅니다.
+- 별도의 설정 정보(오브젝트를 어떻게 생성하고, 어떤 의존관계를 맺어주고)를 참고해서 빈의 생성, 관계설정 등의 제어 작업을 총괄합니다.
+
+설정정보를 만드는 방법은 여러가지가 있는데,
+
+**AppConfig.java**
+```java
+@RequiredArgsConstructor
+public class AppConfig {
+
+    private final EntityManager em;
+
+    public UserRepositoryV5 userRepository(){
+        return new UserRepositoryV5Impl(em);
+    }
+
+    public UserServiceV5 userService(){
+        return new UserServiceV5(userRepository());
+    }
+}
+```
+이러한 (롬복을 사용하긴 했지만?) 순수 자바 코드도, 스프링 애노테이션을 활용하 간단하게 설정정보를 만들어 줄 수 있습니다.
+
+**설정 정보 만드는 방법**
+1. 애플리케이션 컨텍스트를 위한 오브젝트 설정을 담당하는 클래스라고 인식할수 있도록 `@Configuration`이라는 어노테이션을 추가합니다.
+2. 오브젝트를 만들어주는 메소드에는 `@Bean`이라는 애노테이션을 추가합니다.
+
+**AppConfig.java**
+```java
+@Configuration
+public class SpringAppConfigV1 {
+
+    @Bean
+    @Primary
+    public LocalEntityManagerFactoryBean getEmf(){
+        LocalEntityManagerFactoryBean emf=new LocalEntityManagerFactoryBean();
+        emf.setPersistenceUnitName("hello");
+        return emf;
+    }
+
+    @Bean
+    @Primary
+    public EntityManager getEm(){
+        return getEmf().getObject().createEntityManager();
+    }
+
+    @Bean
+    public UserRepositoryV5 userRepository(){
+        return new UserRepositoryV5Impl(getEm());
+    }
+
+    @Bean
+    public UserServiceV5 userService(){
+        return new UserServiceV5(userRepository());
+    }
+}
+```
+
+>현재, 이 설정 정보에서는 EntityManager Bean을 직접 만들어줬습니다. 헌재까지는, 스프링 부트에서 자동 주입하여 주는 EntityManager를 사용해주었습니다., 지금 
+> 이 설정정보 클래스에서는 아직 스프링 부트에서 만든 EntityManager Bean이 존재하지 않기 때문에 따로 EntityManager Bean과 TransactionManager Bean을
+> 만들어야합니다. 저는 Transaction이 존재하지 않아도 테스트를 수행하는데는 무리가 없다 생각하여, EntityManager만 생성해 주었고
+> 스프링 애플리케이션이 로드될때, 스프링 부트에서 만드는 EntityManager와 혼동이 생길 수 있으므로 @Primary 애노테이션을 추가로 붙여 주었습니다.
+
+**persistence.xml**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+    <persistence-unit name="hello">
+        <properties>
+            <!-- 필수 속성 -->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/dependencytest"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+
+            <!-- 옵션 -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
+            <!--<property name="hibernate.hbm2ddl.auto" value="create" />-->
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+
+이렇게, 애플리케이션 컨텍스트가 Ioc방식의 기능을 제공할 때 사용할 완벽한 설정정보를 만들었습니다.
+
+이제, 테스트 코드를 통해 ApplicationContext를 만들어봅시다.
+1. AnnotationConfigApplicationContext를 이용하여 설정정보를 적용한 애플리케이션 컨텍스트 생성
+2. getBean() 메소드를 활용하여 설정정보에 정의해 놓은 Bean을 가져올 수 있습니다.
+
+**SpringAppConfigTest.java**
+```java
+@SpringBootTest
+@Transactional
+public class SpringAppConfigV1Test {
+
+    @Test
+    @DisplayName("Bean Test")
+    void 빈_테스트(){
+        User user=createUser("hong","123");
+
+        AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(SpringAppConfigV1.class);
+
+        UserServiceV5 userService= ac.getBean("userService",UserServiceV5.class);
+
+        Long saveId = userService.join(user);
+
+        User findUser = userService.findOne(saveId);
+
+        Assertions.assertThat(findUser.getName()).isEqualTo(user.getName());
+        Assertions.assertThat(findUser.getPassword()).isEqualTo(user.getPassword());
+    }
+
+    private User createUser(String name, String password){
+        return User.createUser()
+                .name(name)
+                .password(password)
+                .build();
+    }
+}
+```
+
+**동작 확인**
+
+<img width="50%" alt="스크린샷 2021-10-04 오후 10 51 11" src="https://user-images.githubusercontent.com/56334761/135863453-16dabc5d-9450-468e-9d3c-722aea2d98bc.png">
+
+동작 확인 까지 하였습니다. 그런데 이렇게 봐서는 더 번거로울 뿐이지 딱히 장점은 없어보입니다.
+
+이러한 고민은, 스프링은 날려버리라고 합니다. 얻을 수 없는 방대한 기능을 제공할테니..
+
+### 🔧 애플리케이션 컨텍스트의 동작방식
+
+오브젝트 팩토리와 애플리케이션 컨텍스트
+
+사용 방식 및 설정 정보 먼저 보시죠.
+
+**오브젝트 팩토리**
+
+```java
+@RequiredArgsConstructor
+public class AppConfig {
+
+    private final EntityManager em;
+
+    public UserRepositoryV5 userRepository(){
+        return new UserRepositoryV5Impl(em);
+    }
+
+    public UserServiceV5 userService(){
+        return new UserServiceV5(userRepository());
+    }
+}
+```
+```java
+AppConfig appConfig=new AppConfig(em);
+UserServiceV5 userService= appConfig.userService();
+```
+
+**애플리케이션 컨텍스트**
+```java
+@Configuration
+public class SpringAppConfigV1 {
+
+    @Bean
+    @Primary
+    public LocalEntityManagerFactoryBean getEmf(){
+        LocalEntityManagerFactoryBean emf=new LocalEntityManagerFactoryBean();
+        emf.setPersistenceUnitName("hello");
+        return emf;
+    }
+
+    @Bean
+    @Primary
+    public EntityManager getEm(){
+        return getEmf().getObject().createEntityManager();
+    }
+
+    @Bean
+    public UserRepositoryV5 userRepository(){
+        return new UserRepositoryV5Impl(getEm());
+    }
+
+    @Bean
+    public UserServiceV5 userService(){
+        return new UserServiceV5(userRepository());
+    }
+}
+```
+```java
+AnnotationConfigApplicationContext ac=new AnnotationConfigApplicationContext(SpringAppConfigV1.class);
+UserServiceV5 userService= ac.getBean("userService",UserServiceV5.class);
+
+```
+
+여기서 보시면, 오브젝트 팩토리는 `service` 오브젝트를 생성하고 `repository`와 관계를 맺어주는 제한적인 역할을 하는 데에 반해,
+애플리케이션 컨텍스트는 IOC를 적용해서 관리할 모든 오브젝트에 대한 생성과 관계설정을 담당합니다.
+
+애플리케이션 컨텍스트는 @Configuration 이 붙은 설정 정보를 활용하여 등록 된 빈을 호출해서 가져온 것을 클라이언트가 getBean()을 요청할 때 
+전달해 줍니다.
+
+애플리케이션 컨텍스트를 사용하는 이유는 범용적이고 유연한 방법으로 Ioc기능을 확장하기 위해서 입니다. 이렇게만 해서는 아직 까지도 장점이 뭔지
+감이 안잡힙니다. 자세히 살펴보죠.
+
+**애플레킹션 컨텍스트를 사용했을 때의 장점**
+- 클라이언트는 구체적인 팩토리 클래스를 알 필요 없다.
+  - 애플리케이션 발전시, IoC를 적용한 오브젝트도 계속 추가될 것, 클라이언트가 필요한 오브젝트를 가져오려면 어떤 팩토리 클래스를 사용 했는지를 알아야 하고,
+  필요할 때 마다 팩토리 오브젝트를 생성해야하는 번거로움이 있습니다. (`AppConfig ac=new AppConfg()`, 새로운 팩토리인 DaoFactory가 만들어 졌다면
+  `DaoFactory da=new DaoFactory()` 이렇게 구체적으로 알아야 함.)
+  - 애플리케이션 컨텍스트를 활용하게 되면 일관된 방식으로 원하는 오브젝트를 가져올 수 있습니다.(`AnnotaionConfigApplicationContext ac=new Annotaion
+  ConfigApplication(@Configuration이 붙은 클래스)`)
+- 애플리케이션 컨텍스트는 종합 IoC 서비스를 제공.
+  - 의존관계를 맺어주는 것 이상으로 오브젝트가 만들어지는 방식, 시점과 전략 등등 효과적인 다양한 기능들을 제공합니다.
+- 애플리케이션 컨텍스트는 빈을 검색하는 다양한 방법을 제공

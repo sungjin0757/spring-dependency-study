@@ -13,29 +13,29 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.beans.JavaBean;
 
-//@Configuration
+@Configuration
 public class SpringAppConfigV1 {
 
-//    @Bean
-//    @Primary
+    @Bean
+    @Primary
     public LocalEntityManagerFactoryBean getEmf(){
         LocalEntityManagerFactoryBean emf=new LocalEntityManagerFactoryBean();
         emf.setPersistenceUnitName("hello");
         return emf;
     }
 
-//    @Bean
-//    @Primary
+    @Bean
+    @Primary
     public EntityManager getEm(){
         return getEmf().getObject().createEntityManager();
     }
 
-//    @Bean
+    @Bean
     public UserRepositoryV5 userRepository(){
         return new UserRepositoryV5Impl(getEm());
     }
 
-//    @Bean
+    @Bean
     public UserServiceV5 userService(){
         return new UserServiceV5(userRepository());
     }
